@@ -9,7 +9,7 @@ def test_smartphone(browser):
     global start_time
     smartphones_page = Smartphones_page(browser)
     smartphones_page.open()
-    time.sleep(1)
+    time.sleep(2)
     smartphones_page.check_random_smartphone_card()
     time.sleep(1)
     item_shop_page = Item_shop_page(browser, browser.current_url)
