@@ -19,6 +19,8 @@ def browser():
         options.add_argument('--ignore-certificate-errors-spki-list')
         options.add_argument('--ignore-certificate-errors')
         options.add_argument('--ignore-ssl-errors')
+        options.add_argument('--allow-insecure-localhost')
+        options.add_argument('disable-quic')
         
         browser = webdriver.Chrome(options=options)
         browser.implicitly_wait(10)

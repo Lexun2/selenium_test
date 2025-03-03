@@ -19,7 +19,7 @@ class Base_page:
         global cookie_accepted
         if not cookie_accepted:
             try:
-                WebDriverWait(self.browser, 5).until(EC.element_to_be_clickable(self.button_accept_cookie_locator), "except! не вижу - 'cookie_frame_locator'").click
+                WebDriverWait(self.browser, 5).until(EC.element_to_be_clickable(self.button_accept_cookie_locator), "except! не вижу - 'button_accept_cookie_locator'").click
                 button_accept_cookie = self.browser.find_element(*self.button_accept_cookie_locator)
                 self.browser.execute_script("arguments[0].click();", button_accept_cookie)
                 cookie_accepted = True
