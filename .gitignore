@@ -3,3 +3,5 @@ __pycache__
 include
 pages/__pycache__
 tests/__pycache__
+Scripts
+Lib
