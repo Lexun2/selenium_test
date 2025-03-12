@@ -2,9 +2,10 @@
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-import time
+from selenium.common.exceptions import TimeoutException
 from conftest import cookie_accepted
-
+from selenium.webdriver.common.action_chains import ActionChains
+import time
 
 class Base_page:
 
@@ -12,80 +13,45 @@ class Base_page:
     cookie_frame_locator         = (By.XPATH,"//div[@role='dialog']/descendant::span[text()='Мы используем файлы cookie']")
     button_accept_cookie_locator = (By.XPATH,"//div[@role='dialog']/descendant::button[text()='Принять']")
     
+    
+
     def __init__(self, browser):
         self.browser = browser
 
-    def accept_cookie(self):
-        global cookie_accepted
-        if not cookie_accepted:
-            try:
-                WebDriverWait(self.browser, 5).until(EC.element_to_be_clickable(self.button_accept_cookie_locator), "except! не вижу - 'button_accept_cookie_locator'").click
-                button_accept_cookie = self.browser.find_element(*self.button_accept_cookie_locator)
-                self.browser.execute_script("arguments[0].click();", button_accept_cookie)
-                cookie_accepted = True
-            except Exception as exc:
-                self.browser.execute_script("arguments[0].click();", button_accept_cookie)
-                print("Ошибка = {exc}")
 
 
-        # # try:
-            
-        #     WebDriverWait(self.browser, 10).until(EC.presence_of_element_located(self.cookie_frame_locator), "except wait presence 'cookie_frame_locator'")
-        #     # time.sleep(100)
-        #     button_accept_cookie = self.browser.find_element(*self.button_accept_cookie_locator)
-        #     # self.browser.execute_script("arguments[0].click();", button_accept_cookie)
-        #     try: WebDriverWait(self.browser, 1).until(EC.element_to_be_clickable(self.button_accept_cookie_locator), "except wait button 1")
-        #     except Exception as exc: print(exc)
-        #     try: WebDriverWait(self.browser, 1).until(EC.element_to_be_clickable(self.button_accept_cookie_locator), "except wait button 2")
-        #     except Exception as exc: print(exc)
-        #     try: WebDriverWait(self.browser, 1).until(EC.element_to_be_clickable(self.button_accept_cookie_locator), "except wait button 3")
-        #     except Exception as exc: print(exc)
-        #     try: WebDriverWait(self.browser, 1).until(EC.element_to_be_clickable(self.button_accept_cookie_locator), "except wait button 4")
-        #     except Exception as exc: print(exc)
-        #     try: WebDriverWait(self.browser, 1).until(EC.element_to_be_clickable(self.button_accept_cookie_locator), "except wait button 5")
-        #     except Exception as exc: print(exc)
-        #     try: WebDriverWait(self.browser, 1).until(EC.element_to_be_clickable(self.button_accept_cookie_locator), "except wait button 6")
-        #     except Exception as exc: print(exc)
-        #     try: WebDriverWait(self.browser, 1).until(EC.element_to_be_clickable(self.button_accept_cookie_locator), "except wait button 7")
-        #     except Exception as exc: print(exc)
-        #     try: WebDriverWait(self.browser, 1).until(EC.element_to_be_clickable(self.button_accept_cookie_locator), "except wait button 8")
-        #     except Exception as exc: print(exc)
-        #     try: WebDriverWait(self.browser, 1).until(EC.element_to_be_clickable(self.button_accept_cookie_locator), "except wait button 9")
-        #     except Exception as exc: print(exc)
-        #     self.browser.execute_script("return arguments[0].scrollIntoView(true);", button_accept_cookie)
-        #     try:
-        #         button_accept_cookie.click()
-        #         WebDriverWait(self.browser, 10).until(EC.invisibility_of_element_located(self.cookie_frame_locator), "except wait not visible 'cookie_frame_locator' 1")
-        #     except Exception as exc: print(exc)
-        #     try:
-        #         button_accept_cookie.click()
-        #         WebDriverWait(self.browser, 1).until(EC.invisibility_of_element_located(self.cookie_frame_locator), "except wait not visible 'cookie_frame_locator' 2")
-        #     except Exception as exc: print(exc)
-        #     try:
-        #         button_accept_cookie.click()
-        #         WebDriverWait(self.browser, 1).until(EC.invisibility_of_element_located(self.cookie_frame_locator), "except wait not visible 'cookie_frame_locator' 3")
-        #     except Exception as exc: print(exc)
-        #     try:
-        #         button_accept_cookie.click()
-        #         WebDriverWait(self.browser, 1).until(EC.invisibility_of_element_located(self.cookie_frame_locator), "except wait not visible 'cookie_frame_locator' 4")
-        #     except Exception as exc: print(exc)
-        #     try:
-        #         button_accept_cookie.click()
-        #         WebDriverWait(self.browser, 1).until(EC.invisibility_of_element_located(self.cookie_frame_locator), "except wait not visible 'cookie_frame_locator' 5")
-        #     except Exception as exc: print(exc)
-        #     try:
-        #         button_accept_cookie.click()
-        #         WebDriverWait(self.browser, 1).until(EC.invisibility_of_element_located(self.cookie_frame_locator), "except wait not visible 'cookie_frame_locator' 6")
-        #     except Exception as exc: print(exc)
+    def is_element_present(self, how, what, timeout=4):
+        try:
+            WebDriverWait(self.browser, timeout).until(EC.visibility_of_element_located((how, what)))
+        except TimeoutException:
+            return False
+        return True
+    
 
-
-        # except Exception as exc:
-        #     print(f"Поймали ошибку: {exc}")
-        #     self.browser.quit()
 
     def open(self):
         self.browser.get(self.url)
         self.accept_cookie()
+
+
+
+
+    def accept_cookie(self):
+        global cookie_accepted
+        if not cookie_accepted:
+            try:  
+                while (self.is_element_present(*self.cookie_frame_locator)):
+                    button_accept_cookie = WebDriverWait(self.browser, 50).until(EC.visibility_of_element_located(self.button_accept_cookie_locator), "except! не вижу - 'button_accept_cookie_locator'")
+                    actions = ActionChains(self.browser)
+                    actions.move_to_element(button_accept_cookie).perform()
+                    actions.click().perform()
+                    time.sleep(1)
+                cookie_accepted = True
+            except Exception as exc:
+                print(f"Ошибка по принятию соглашения кукисов = {exc}")
+
+
+
         
     
     
